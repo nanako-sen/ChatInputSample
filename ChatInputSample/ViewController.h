@@ -10,11 +10,11 @@
 #import "THChatInput.h"
 
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <THChatInputDelegate>
 
-@property (retain, nonatomic) IBOutlet UITextView *textView;
+@property (strong, nonatomic)  UITextView *textView;
 
-@property (retain, nonatomic) IBOutlet THChatInput *chatInput;
-@property (retain, nonatomic) IBOutlet UIView *emojiInputView;
+@property (strong, nonatomic)  THChatInput *chatInput;
+@property (strong, nonatomic)  UIView *emojiInputView;
 
 @end

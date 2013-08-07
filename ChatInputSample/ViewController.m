@@ -16,26 +16,49 @@
 
 @implementation ViewController
 
+@synthesize textView = _textView, chatInput = _chatInput, emojiInputView = _emojiInputView;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)loadView
+{
+    self.view = [[UIView alloc] init];
+    if (self.view == nil) {
+        [super loadView];
+    }
+    self.view.backgroundColor = [UIColor whiteColor];
+}
 
 - (void) viewDidLoad {
    
    [super viewDidLoad];
 	
-   _chatInput.backgroundColor = [UIColor clearColor];
-   _chatInput.inputBackgroundView.image = [[UIImage imageNamed:@"Chat_Footer_BG.png"] stretchableImageWithLeftCapWidth:80 topCapHeight:25];
-   
-	[_chatInput.attachButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_ArrowUp.png"] forState:UIControlStateNormal];
-	[_chatInput.attachButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_ArrowUp_Pressed.png"] forState:UIControlStateHighlighted];
-	[_chatInput.attachButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_ArrowUp_Pressed.png"] forState:UIControlStateSelected];
-   
-	[_chatInput.emojiButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_Smiley_Icon.png"] forState:UIControlStateNormal];
-	[_chatInput.emojiButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_Smiley_Icon_Pressed.png"] forState:UIControlStateHighlighted];
-	[_chatInput.emojiButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_Smiley_Icon_Pressed.png"] forState:UIControlStateSelected];
-
-   [_chatInput.sendButton setBackgroundImage:[UIImage imageNamed:@"Chat_Send_Button.png"] forState:UIControlStateNormal];
-	[_chatInput.sendButton setBackgroundImage:[UIImage imageNamed:@"Chat_Send_Button_Pressed.png"] forState:UIControlStateHighlighted];
-	[_chatInput.sendButton setBackgroundImage:[UIImage imageNamed:@"Chat_Send_Button_Pressed.png"] forState:UIControlStateSelected];
-	[_chatInput.sendButton setTitle:@"Send" forState:UIControlStateNormal];
+    self.chatInput = [[THChatInput alloc] initWithFrame:CGRectMake(0, 417, 320, 44)];
+    self.chatInput.delegate = self;
+    self.chatInput.backgroundColor = [UIColor clearColor];
+    
+//    self.chatInput.inputBackgroundView.image = [[UIImage imageNamed:@"Chat_Footer_BG.png"] stretchableImageWithLeftCapWidth:80 topCapHeight:25];
+//   
+//	[self.chatInput.attachButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_ArrowUp.png"] forState:UIControlStateNormal];
+//	[self.chatInput.attachButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_ArrowUp_Pressed.png"] forState:UIControlStateHighlighted];
+//	[self.chatInput.attachButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_ArrowUp_Pressed.png"] forState:UIControlStateSelected];
+//   
+//	[self.chatInput.emojiButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_Smiley_Icon.png"] forState:UIControlStateNormal];
+//	[self.chatInput.emojiButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_Smiley_Icon_Pressed.png"] forState:UIControlStateHighlighted];
+//	[self.chatInput.emojiButton setBackgroundImage:[UIImage imageNamed:@"Chat_Footer_Smiley_Icon_Pressed.png"] forState:UIControlStateSelected];
+//
+//    [self.chatInput.sendButton setBackgroundImage:[UIImage imageNamed:@"Chat_Send_Button.png"] forState:UIControlStateNormal];
+//	[self.chatInput.sendButton setBackgroundImage:[UIImage imageNamed:@"Chat_Send_Button_Pressed.png"] forState:UIControlStateHighlighted];
+//	[self.chatInput.sendButton setBackgroundImage:[UIImage imageNamed:@"Chat_Send_Button_Pressed.png"] forState:UIControlStateSelected];
+//	[self.chatInput.sendButton setTitle:@"Send" forState:UIControlStateNormal];
+    [self.view addSubview:self.chatInput];
 }
 
 - (void) didReceiveMemoryWarning {
@@ -43,44 +66,29 @@
    [super didReceiveMemoryWarning];
 }
 
-- (void) dealloc {
-   
-   [_textView release];
-   [_chatInput release];
-   [_emojiInputView release];
-   [super dealloc];
-}
 
-- (void) viewDidUnload {
-   
-   [self setTextView:nil];
-   [self setChatInput:nil];
-   [self setEmojiInputView:nil];
-   [super viewDidUnload];
-}
+#pragma mark - THChatDelegate methods
 
 - (void) sendButtonPressed:(id)sender {
    
-   _textView.text = _chatInput.textView.text;
-   
-   _chatInput.textView.text = @"";
-   [_chatInput fitText];
+    self.textView.text = _chatInput.inputText;   
+    [self.chatInput clearText];
 }
 
 
 - (void) showEmojiInput:(id)sender {
    
-   _chatInput.textView.inputView = _chatInput.textView.inputView == nil ? _emojiInputView : nil;
-   
-   [_chatInput.textView reloadInputViews];
+//   self.chatInput.textView.inputView = _chatInput.textView.inputView == nil ? _emojiInputView : nil;
+//   
+//   [self.chatInput.textView reloadInputViews];
 }
 
 - (void) returnButtonPressed:(id)sender {
    
-   _textView.text = [sender text];
-   
-   _chatInput.textView.text = @"";
-   [_chatInput fitText];
+   self.textView.text = [sender text];
+    [sender resignFirstResponder];
+//   self.chatInput.textView.text = @"";
+   [self.chatInput adjustTextViewHeight];
 }
 
 @end

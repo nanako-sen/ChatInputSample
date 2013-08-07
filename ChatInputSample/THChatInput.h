@@ -6,23 +6,35 @@
 #import <UIKit/UIKit.h>
 
 @interface THChatInput : UIView <UITextViewDelegate> {
+    id __unsafe_unretained delegate;
 
+//    UIButton* sendButton;
+//    UIButton* attachButton;
+//    UIButton* emojiButton;
+//    UITextView* textView;
+    
 }
-@property (assign) IBOutlet id delegate;
+@property (unsafe_unretained) id delegate;
+@property (nonatomic, strong, readonly) NSString *inputText;
 
-@property (assign) int inputHeight;
-@property (assign) int inputHeightWithShadow;
-@property (assign) BOOL autoResizeOnKeyboardVisibilityChanged;
+//@property (strong, nonatomic) UIButton* sendButton;
+//@property (strong, nonatomic) UIButton* attachButton;
+//@property (strong, nonatomic) UIButton* emojiButton;
+//@property (strong, nonatomic) UITextView* textView;
 
-@property (strong, nonatomic) UIButton* sendButton;
-@property (strong, nonatomic) UIButton* attachButton;
-@property (strong, nonatomic) UIButton* emojiButton;
-@property (strong, nonatomic) UITextView* textView;
-@property (strong, nonatomic) UILabel* lblPlaceholder;
-@property (strong, nonatomic) UIImageView* inputBackgroundView;
-
-- (void) fitText;
-
+- (void) clearText;
+- (void) adjustTextViewHeight;
 - (void) setText:(NSString*)text;
+
+@end
+
+@protocol THChatInputDelegate
+
+@required
+- (void) sendButtonPressed:(id)sender;
+- (void) returnButtonPressed:(id)sender;
+@optional
+- (void) showAttachInput:(id)sender;
+- (void) showEmojiInput:(id)sender;
 
 @end
