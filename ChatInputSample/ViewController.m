@@ -40,7 +40,7 @@
    
    [super viewDidLoad];
 	
-    self.chatInput = [[THChatInput alloc] initWithFrame:CGRectMake(0, 417, 320, 44)];
+    self.chatInput = [[THChatInput alloc] initWithFrame:CGRectMake(0, 417, 320, 44) ofType:THInputOnly];
     self.chatInput.delegate = self;
     self.chatInput.backgroundColor = [UIColor clearColor];
     

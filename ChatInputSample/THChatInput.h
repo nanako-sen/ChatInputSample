@@ -5,6 +5,10 @@
 
 #import <UIKit/UIKit.h>
 
+typedef enum {
+    THInputOnly
+} THChatInputType;
+
 @interface THChatInput : UIView <UITextViewDelegate> {
     id __unsafe_unretained delegate;
 
@@ -22,6 +26,8 @@
 //@property (strong, nonatomic) UIButton* emojiButton;
 //@property (strong, nonatomic) UITextView* textView;
 
+- (id) initWithFrame:(CGRect)frame ofType:(THChatInputType)type;
+
 - (void) clearText;
 - (void) adjustTextViewHeight;
 - (void) setText:(NSString*)text;
@@ -33,7 +39,12 @@
 @required
 - (void) sendButtonPressed:(id)sender;
 - (void) returnButtonPressed:(id)sender;
+
 @optional
+- (void) textViewDidBeginEditing:(UITextView*)textView;
+- (void) textViewDidEndEditing:(UITextView*)textView;
+- (BOOL) textView:(UITextView*)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString*)text;
+- (void) textViewDidChange:(UITextView*)textView;
 - (void) showAttachInput:(id)sender;
 - (void) showEmojiInput:(id)sender;
 

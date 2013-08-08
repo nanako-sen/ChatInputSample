@@ -8,7 +8,7 @@
 
 @interface THChatInput() {
     UILabel *_lblPlaceholder;
-    UIView *_inputBackgroundView;
+//    UIView *_inputBackgroundView;
 
 //    UIButton *_attachButton;
 //    UIButton *_emojiButton;
@@ -24,7 +24,7 @@
 
 @synthesize delegate = _delegate;
 
-- (id) initWithFrame:(CGRect)frame
+- (id) initWithFrame:(CGRect)frame ofType:(THChatInputType)type
 {  
     if (self = [super initWithFrame:frame])
     {
@@ -32,7 +32,9 @@
         _inputHeightWithShadow = CGRectGetHeight(frame);
         _autoResizeOnKeyboardVisibilityChanged = YES;
         
-        [self composeView];
+        if (type == THInputOnly) {
+            [self composeInputandSend];
+        }
     }
     return self;
 }
@@ -42,18 +44,15 @@
     return _textView.text;
 }
 
-- (void) composeView
+
+- (void)composeInputandSend
 {
-   
-   CGSize size = self.frame.size;
-   
-   // Input
-	_inputBackgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
-    _inputBackgroundView.backgroundColor = [UIColor grayColor];
-	[self addSubview:_inputBackgroundView];
-   
-    UIView *test = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 230, 15)];
-    test.backgroundColor = [UIColor yellowColor];
+    CGSize size = self.frame.size;
+    
+    // Input
+//	_inputBackgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
+//    _inputBackgroundView.backgroundColor = [UIColor grayColor];
+//	[self addSubview:_inputBackgroundView];
     
 	// Text field
 	_textView = [[UITextView alloc] initWithFrame:CGRectMake(10, 10, 230, 15)];
@@ -64,18 +63,30 @@
     _textView.showsHorizontalScrollIndicator = NO;
 	_textView.font = [UIFont systemFontOfSize:15.0f];
     _textView.layer.cornerRadius = 6;
-	[_inputBackgroundView addSubview:_textView];
-   
+	[self addSubview:_textView];
+    
     [self adjustTextInputHeightForText:@"" animated:NO];
-   
+    
     _lblPlaceholder = [[UILabel alloc] initWithFrame:_textView.frame];
     _lblPlaceholder.font = [UIFont systemFontOfSize:15.0f];
     _lblPlaceholder.text = @" Type here...";
     _lblPlaceholder.textColor = [UIColor lightGrayColor];
     _lblPlaceholder.backgroundColor = [UIColor clearColor];
-    [_inputBackgroundView addSubview:_lblPlaceholder];
+    [self addSubview:_lblPlaceholder];
+    
+    
+    //http://stackoverflow.com/questions/2808888/is-it-even-possible-to-change-a-uibuttons-background-color
+    _sendButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+	_sendButton.frame = CGRectMake(size.width - 64.0f, 10.0f, 58.0f, 27.0f);
+    [_sendButton setTitle:@"send" forState:UIControlStateNormal];
+    [_sendButton addTarget:self action:@selector(sendButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+	[self addSubview:_sendButton];
+}
+
+- (void) composeView
+{
    
-//	// Attach buttons
+   //	// Attach buttons
 //	_attachButton = [UIButton buttonWithType:UIButtonTypeCustom];
 //	_attachButton.frame = CGRectMake(6.0f, 12.0f, 26.0f, 27.0f);
 //	_attachButton.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
@@ -89,23 +100,7 @@
 //	[self addSubview:_emojiButton];
 	
 	// Send button
-    
-    _sendButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
 
-    
-//	_sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	_sendButton.frame = CGRectMake(size.width - 64.0f, 12.0f, 58.0f, 27.0f);
-//	_sendButton.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-//	_sendButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14];
-//	_sendButton.titleLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
-    [_sendButton setTitle:@"send" forState:UIControlStateNormal];
-//    _sendButton.backgroundColor = [UIColor grayColor];
-//	[_sendButton setTitleColor:[UIColor colorWithWhite:1.0f alpha:0.4f] forState:UIControlStateNormal];
-   //	[_sendButton setTitleShadowColor:[UIColor colorWithRed:0.325f green:0.463f blue:0.675f alpha:1.0f] forState:UIControlStateNormal];
-//	[_sendButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-//	[_sendButton setTitleShadowColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_sendButton addTarget:self action:@selector(sendButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-	[_inputBackgroundView addSubview:_sendButton];
    
 }
 
@@ -120,7 +115,7 @@
        int delta = h - self.frame.size.height;
        CGRect r2 = CGRectMake(0, self.frame.origin.y - delta, self.frame.size.width, h);
        self.frame = r2; //CGRectMake(0, self.frame.origin.y - delta, self.superview.frame.size.width, h);
-       _inputBackgroundView.frame = CGRectMake(0, 0, self.frame.size.width, h);
+//       _inputBackgroundView.frame = CGRectMake(0, 0, self.frame.size.width, h);
        
        CGRect r = _textView.frame;
 //       r.origin.y = 10;
@@ -154,7 +149,8 @@
 
 #pragma mark UITextFieldDelegate Delegate
 
-- (void) textViewDidBeginEditing:(UITextView*)textView {
+- (void) textViewDidBeginEditing:(UITextView*)textView
+{
    
    if (_autoResizeOnKeyboardVisibilityChanged)
    {
