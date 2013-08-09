@@ -14,15 +14,20 @@
 //    UIButton *_emojiButton;
     UIButton *_sendButton;
     UITextView *_textView;
+    UITextField *_textField;
     int _inputHeightWithShadow;
-    BOOL _autoResizeOnKeyboardVisibilityChanged;
+    BOOL _hasBtnBelow;
 }
 
 @end
 
 @implementation THChatInput
 
-@synthesize delegate = _delegate;
+@synthesize delegate = _delegate, stickToKeyboard = _stickToKeyboard, autoResizeInputField = _autoResizeInputField;
+
+- (id) initWithFrame:(CGRect)frame {
+    return [self initWithFrame:frame ofType:THInputOnly];
+}
 
 - (id) initWithFrame:(CGRect)frame ofType:(THChatInputType)type
 {  
@@ -30,10 +35,17 @@
     {
 //        _inputHeight = 38.0f;
         _inputHeightWithShadow = CGRectGetHeight(frame);
-        _autoResizeOnKeyboardVisibilityChanged = YES;
         
-        if (type == THInputOnly) {
-            [self composeInputandSend];
+        self.stickToKeyboard = YES;
+        self.autoResizeInputField = YES;
+        
+        switch (type) {
+            case THInputOnlySendBelow:
+                [self composeInputAndSendBtnBelow];
+                break;
+            default:                
+                [self composeInputAndSendBtn];
+                break;
         }
     }
     return self;
@@ -44,26 +56,51 @@
     return _textView.text;
 }
 
+- (void)setSearchText:(NSString*)text
+{
+    [_sendButton setTitle:text forState:UIControlStateNormal];
+}
 
-- (void)composeInputandSend
+- (void)composeInputAndSendBtnBelow
+{
+    _hasBtnBelow = YES;
+    CGSize size = self.frame.size;
+    float textViewX = 10;
+    float sendButtonWidth = size.width - textViewX * 2;
+    float textViewWidth = sendButtonWidth;
+    
+    CGRect inputViewFrame = CGRectMake(textViewX, 10, textViewWidth, 0);
+    CGRect sendBtnFrame = CGRectMake(textViewX, size.height - 27, textViewWidth, 27);
+    
+    [self composeInputAndSendBtnWithInputFrame:inputViewFrame andSendBtnFrame:sendBtnFrame];
+}
+
+- (void)composeInputAndSendBtn
 {
     CGSize size = self.frame.size;
+
+    float sendButtonWidth = 58;
+    float textViewX = 10;
+    float sendButtonX = size.width - sendButtonWidth;
+    float textViewWidth = sendButtonX - 5 - textViewX;
     
-    // Input
-//	_inputBackgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
-//    _inputBackgroundView.backgroundColor = [UIColor grayColor];
-//	[self addSubview:_inputBackgroundView];
+    CGRect inputViewFrame = CGRectMake(textViewX, 10, textViewWidth, 15);
+    CGRect sendBtnFrame = CGRectMake(sendButtonX, 10.0f, sendButtonWidth, 27.0f);
     
-	// Text field
-	_textView = [[UITextView alloc] initWithFrame:CGRectMake(10, 10, 230, 15)];
+    [self composeInputAndSendBtnWithInputFrame:inputViewFrame andSendBtnFrame:sendBtnFrame];
+}
+
+- (void)composeInputAndSendBtnWithInputFrame:(CGRect)inputFrame andSendBtnFrame:(CGRect)sendBtnFrame
+{
+    _textView = [[UITextView alloc] initWithFrame:inputFrame];
     _textView.backgroundColor = [UIColor whiteColor];
-	_textView.delegate = self;
+    _textView.delegate = self;
     _textView.contentInset = UIEdgeInsetsMake(-4, -2, -4, 0);
     _textView.showsVerticalScrollIndicator = NO;
     _textView.showsHorizontalScrollIndicator = NO;
-	_textView.font = [UIFont systemFontOfSize:15.0f];
+    _textView.font = [UIFont systemFontOfSize:15.0f];
     _textView.layer.cornerRadius = 6;
-	[self addSubview:_textView];
+    [self addSubview:_textView];
     
     [self adjustTextInputHeightForText:@"" animated:NO];
     
@@ -72,12 +109,13 @@
     _lblPlaceholder.text = @" Type here...";
     _lblPlaceholder.textColor = [UIColor lightGrayColor];
     _lblPlaceholder.backgroundColor = [UIColor clearColor];
+    [_lblPlaceholder sizeToFit];
     [self addSubview:_lblPlaceholder];
     
     
     //http://stackoverflow.com/questions/2808888/is-it-even-possible-to-change-a-uibuttons-background-color
     _sendButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-	_sendButton.frame = CGRectMake(size.width - 64.0f, 10.0f, 58.0f, 27.0f);
+	_sendButton.frame = sendBtnFrame;
     [_sendButton setTitle:@"send" forState:UIControlStateNormal];
     [_sendButton addTarget:self action:@selector(sendButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 	[self addSubview:_sendButton];
@@ -119,7 +157,7 @@
        
        CGRect r = _textView.frame;
 //       r.origin.y = 10;
-       r.size.height = h - 18;
+        r.size.height = !_hasBtnBelow ? h - 18 : h - 18 - 30;
        _textView.frame = r;
        
     } completion:^(BOOL finished)
@@ -131,19 +169,19 @@
 - (void) clearText
 {
     _textView.text = @"";
-    [self adjustTextViewHeight];
+    [self adjustTextInputHeight];
 }
 
-- (void) adjustTextViewHeight {
-   
-   [self adjustTextInputHeightForText:_textView.text animated:YES];
+- (void) adjustTextInputHeight {
+    if (autoResizeInputField)
+        [self adjustTextInputHeightForText:_textView.text animated:YES];
 }
 
 - (void) setText:(NSString*)text {
    
    _textView.text = text;
    _lblPlaceholder.hidden = text.length > 0;
-   [self adjustTextViewHeight];
+   [self adjustTextInputHeight];
 }
 
 
@@ -152,14 +190,14 @@
 - (void) textViewDidBeginEditing:(UITextView*)textView
 {
    
-   if (_autoResizeOnKeyboardVisibilityChanged)
+   if (self.stickToKeyboard)
    {
       [UIView animateWithDuration:.25f animations:^{
          CGRect r = self.frame;
          r.origin.y -= 216;
          [self setFrame:r];
       }];
-      [self adjustTextViewHeight];
+      [self adjustTextInputHeight];
    }
    if ([self.delegate respondsToSelector:@selector(textViewDidBeginEditing:)])
       [self.delegate performSelector:@selector(textViewDidBeginEditing:) withObject:textView];
@@ -167,7 +205,7 @@
 
 - (void) textViewDidEndEditing:(UITextView*)textView {
    
-   if (_autoResizeOnKeyboardVisibilityChanged)
+   if (self.stickToKeyboard)
    {
       [UIView animateWithDuration:.25f animations:^{
          CGRect r = self.frame;
@@ -175,7 +213,7 @@
          [self setFrame:r];
       }];
       
-      [self adjustTextViewHeight];
+      [self adjustTextInputHeight];
    }
    _lblPlaceholder.hidden = _textView.text.length > 0;
    
@@ -191,7 +229,7 @@
          [self.delegate performSelector:@selector(returnButtonPressed:) withObject:_textView afterDelay:.1];
       return NO;
    }
-   else if (text.length > 0)
+   else if (text.length > 0 && self.autoResizeInputField)
    {
       [self adjustTextInputHeightForText:[NSString stringWithFormat:@"%@%@", _textView.text, text] animated:YES];
    }
@@ -202,7 +240,7 @@
    
     _lblPlaceholder.hidden = _textView.text.length > 0;
    
-   [self adjustTextViewHeight];
+   [self adjustTextInputHeight];
    
    if ([self.delegate respondsToSelector:@selector(textViewDidChange:)])
       [self.delegate performSelector:@selector(textViewDidChange:) withObject:textView];

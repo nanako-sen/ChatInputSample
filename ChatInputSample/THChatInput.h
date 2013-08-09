@@ -6,7 +6,8 @@
 #import <UIKit/UIKit.h>
 
 typedef enum {
-    THInputOnly
+    THInputOnly,
+    THInputOnlySendBelow
 } THChatInputType;
 
 @interface THChatInput : UIView <UITextViewDelegate> {
@@ -16,21 +17,27 @@ typedef enum {
 //    UIButton* attachButton;
 //    UIButton* emojiButton;
 //    UITextView* textView;
+    BOOL autoResizeOnKeyboardVisibilityChanged;
+    BOOL autoResizeInputField;
     
 }
 @property (unsafe_unretained) id delegate;
 @property (nonatomic, strong, readonly) NSString *inputText;
+@property (nonatomic, assign) BOOL stickToKeyboard;
+@property (nonatomic, assign) BOOL autoResizeInputField;
+@property (nonatomic, strong) NSString *searchText;
 
 //@property (strong, nonatomic) UIButton* sendButton;
 //@property (strong, nonatomic) UIButton* attachButton;
 //@property (strong, nonatomic) UIButton* emojiButton;
 //@property (strong, nonatomic) UITextView* textView;
-
+- (id) initWithFrame:(CGRect)frame;
 - (id) initWithFrame:(CGRect)frame ofType:(THChatInputType)type;
 
 - (void) clearText;
-- (void) adjustTextViewHeight;
+- (void) adjustTextInputHeight;
 - (void) setText:(NSString*)text;
+
 
 @end
 
